@@ -1,0 +1,114 @@
+#!/bin/sh
+
+KeyboardPercent=`ioreg -c AppleBluetoothHIDKeyboard | grep BatteryPercent | sed 's/[a-z,A-Z, ,|,",=]//g' | tail -1 | awk '{print $1}'`
+
+typeset -i b=5
+#	echo "Battery:"
+echo "Keyboard:	\c"
+
+
+if [ ${#KeyboardPercent} = 0 ]
+then
+	echo "Disconnected\c"
+else
+
+	if [ $KeyboardPercent -lt 11 ]
+	then
+		echo "\033[1;31m\c"
+	else
+		echo "\033[0m\c"
+	fi
+
+	while [ $b -le $KeyboardPercent ]
+	do
+		echo "|\c"
+		b=`expr $b + 5`
+	done
+
+	while [ $b -le 100 ]
+	do
+		echo "\033[1;37m|\033[0m\c"
+		b=`expr $b + 5`
+	done
+
+	echo "\033[0m $KeyboardPercent%\c"
+
+	unset KeyboardPercent
+	unset b
+
+fi
+
+
+echo "\033[0m\nMouse:		\c"
+
+MousePercent=`ioreg -c BNBMouseDevice | grep BatteryPercent | sed 's/[a-z,A-Z, ,|,",=]//g' | tail -1 | awk '{print $1}'`
+
+if [ ${#MousePercent} = 0 ]
+then
+	echo "Disconnected\c"
+else
+
+	if [ $MousePercent -lt 11 ]
+	then
+		echo "\033[1;31m\c"
+	else
+		echo "\033[0m\c"
+	fi
+
+	typeset -i b=5
+	while [ $b -le $MousePercent ]
+	do
+		echo "|\c"
+		b=`expr $b + 5`
+	done
+
+
+	while [ $b -le 100 ]
+	do
+		echo "\033[1;37m|\033[0m\c"
+		b=`expr $b + 5`
+	done
+
+	echo "\033[0m $MousePercent%\c"
+
+	unset MousePercent
+	unset b
+
+fi
+
+echo "\033[0m\nTrackpad:	\c"
+
+TrackpadPercent=`ioreg -c BNBTrackpadDevice | grep BatteryPercent | sed 's/[a-z,A-Z, ,|,",=]//g' | tail -1 | awk '{print $1}'`
+
+if [ ${#TrackpadPercent} = 0 ]
+then
+	echo "Disconnected\c"
+else
+
+	if [ $TrackpadPercent -lt 11 ]
+	then
+		echo "\033[1;31m\c"
+	else
+		echo "\033[0m\c"
+	fi
+
+	typeset -i b=5
+	while [ $b -le $TrackpadPercent ]
+	do
+		echo "|\c"
+		b=`expr $b + 5`
+	done
+
+
+	while [ $b -le 100 ]
+	do
+		echo "\033[1;37m|\033[0m\c"
+		b=`expr $b + 5`
+	done
+
+	echo "\033[0m $TrackpadPercent%\c"
+
+	unset TrackpadPercent
+	unset b
+fi
+echo ""

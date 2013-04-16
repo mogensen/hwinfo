@@ -1,0 +1,53 @@
+#!/usr/bin/perl 
+
+$ethernetIP = `ifconfig en0 | grep "inet" | grep -v 127.0.0.1`; 
+$airportIP = `ifconfig en1 | grep "inet" | grep -v 127.0.0.1`; 
+$externalIP = `curl --silent http://checkip.dyndns.org | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}'`;
+$vpnIP = `ifconfig utun0 2> /dev/null | grep "inet" | grep -v 127.0.0.1 | grep -v inet6 | awk '{print $2}'`;
+
+$airport_network= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I | awk -F: '/ SSID:/ {print $2}' | sed -e 's/.*SSID: //'`; 
+$bssid			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I | awk -F: '/BSSID:/ {print $2}' | sed -e 's/.*BSSID: //'`;
+$chan			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/channel:/ {print $2}'  | sed -e 's/.*channel: //'`;
+$sig			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/agrCtlRSSI:/ {print $2}' | sed -e 's/.*agrCtlRSSI: //'`;
+$noise			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/agrCtlNoise:/ {print $2}' | sed -e 's/.*agrCtlNoise: //'`;
+
+$snr	= int($sig/$noise * 100 + 0.5);
+$spark	= `sparkprocent -v $snr`;
+
+if($ethernetIP) { 
+	$ethernetIP =~ /inet (.*) netmask/s; 
+	$output .= "LAN IP:		$1 \n"; 
+} else {
+	$output .= "LAN IP:		INACTIVE \n";
+} 
+
+if($externalIP) { 
+	$output .= "EXT IP:		$externalIP"; 
+} else {
+	$output .= "EXT IP:		OFFLINE \n";
+} 
+
+if($vpnIP) { 
+	$vpnIP =~ /inet (.*) netmask/s; 
+	$output .= "VPN IP:		$1 \n"; 
+} else {
+	$output .= "VPN IP:		INACTIVE \n";
+} 
+
+if($airportIP) { 
+	$airportIP =~ /inet (.*) netmask/s; 
+	$airportIP = $1; 
+	$output .= "\n";
+	$output .= "Airport\n";
+	$output .= "IP:		$airportIP\n";
+	$output .= "SSID:		$airport_network"; 
+	$output .= "BSSID:		$bssid"; 
+	$output .= "CHANNEL:	$chan";
+	$output .= "SIGNAL:		$sig";
+	$output .= "NOISE:		$noise";
+	$output .= "SNR:		$spark";
+} else { 
+	$output .= "Airport:#INACTIVE";
+} 
+
+print $output;

@@ -1,0 +1,39 @@
+#!/bin/sh
+
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+ATTR_RESET=$(tput sgr0)
+
+header() {
+	echo
+	echo "${RED}###" $1 "###${ATTR_RESET}"
+}
+
+## Get the real path for this script
+## allows for symlinking the hwstat script and still letting it access the stat
+## scripts
+pushd . > /dev/null
+SCRIPT_PATH="${BASH_SOURCE[0]}";
+  while([ -h "${SCRIPT_PATH}" ]) do 
+    cd "`dirname "${SCRIPT_PATH}"`"
+    SCRIPT_PATH="$(readlink "`basename "${SCRIPT_PATH}"`")"; 
+  done
+cd "`dirname "${SCRIPT_PATH}"`" > /dev/null
+SCRIPT_PATH="`pwd`";
+popd  > /dev/null
+
+header "CPU and Disk"
+${SCRIPT_PATH}/cpustat
+${SCRIPT_PATH}/diskstat
+
+header "Memory"
+${SCRIPT_PATH}/memstat
+
+header "Power status"
+${SCRIPT_PATH}/batterystat
+
+header "Network status"
+${SCRIPT_PATH}/networkstat
+
+header "Keyboard and mouse"
+${SCRIPT_PATH}/keyboard_mouse_trackpadstat

@@ -1,0 +1,44 @@
+#!/bin/sh
+## FUNCTION FOR CHECKING IF - BATTERY IS FULLY CHARGED
+is_fully_charged=`ioreg -n AppleSmartBattery | grep FullyCharged | awk '{ print $5 }'`
+
+cycle_count=`ioreg -w0 -l | grep CycleCount | awk '{print $5}'`
+
+# IF THE BATTERY IS FULLY CHARGED, ECHO SO
+if [ $is_fully_charged = "Yes" ] ; then 
+	echo "full charge"
+
+	# IF THE BATTERY IS NOT FULLY CHARGED, FOLLOW BELOW
+else 
+	## FUNCTION FOR CHECKING IF - AC ADAPTER PRESENT
+	ac_connect=`ioreg -w0 -l | grep ExternalConnected | awk '{print $5}'`
+
+	## FUNCTION TO GET BATTERY PERCENTAGE
+	cur_power=`ioreg -w0 -l | grep CurrentCapacity | awk '{print $5}'`
+	max_power=`ioreg -w0 -l | grep MaxCapacity | awk '{print $5}'`
+	cur_percent=`echo "scale=2;$cur_power / $max_power" | bc`
+	bat_percent=`echo "$cur_percent * 100" | bc | sed 's/.00//'`
+
+
+	# CHECK FOR AC
+	if [ "$ac_connect" == "Yes" ]
+	then
+		# RUNNING FROM AC? YES, GREEN TEXT
+			echo "AC		\033[33;32m`sparkprocent -v $bat_percent`"
+	else
+		# RUNNING FROM AC? NO, CHECK BATTERY PERCENTAGE
+		time_to_empty=`ioreg -w0 -l | grep AvgTimeToEmpty | awk '{print $5}'`
+
+		if [ "$bat_percent" -lt "21" ]
+		then
+			# IF PERCENT IS BELOW 20%, RED TEXT
+			echo "Battery		\033[33;31m`sparkprocent -v $bat_percent`	$time_to_empty min"
+			# IF ABOVE 20%, TEXT THAT YOU CHOOSE FROM STYLES
+		else 
+			echo "Battery		`sparkprocent -v $bat_percent`	$time_to_empty min"
+
+		fi
+	fi
+fi
+echo "\033[0m\c"
+echo "CycleCount	$cycle_count"

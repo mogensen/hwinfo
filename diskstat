@@ -1,0 +1,21 @@
+#!/bin/sh
+
+rm /tmp/disks.lst
+#getting disks..due to better handling with awk it creates a file
+df -H | grep -vE '^Filesystem|tmpfs|cdrom|devfs|map|disk2' | awk '{ print $1 " " $5 " " $4 }' >> /tmp/disks.lst
+
+#how many disks do we have?
+count=`wc -l /tmp/disks.lst|awk '{print $1}'`
+for ((i=1;i <= $count;i++))
+do
+	currname=`awk -v i=$i 'NR==i' /tmp/disks.lst|awk '{print $1}'`
+	currp=`awk -v i=$i 'NR==i' /tmp/disks.lst|awk '{print $2}'|cut -d'%' -f1`
+	currav=`awk -v i=$i 'NR==i' /tmp/disks.lst|awk '{print $3}'`
+
+	echo "$currname  	`sparkprocent -v $currp`	free: $currav"
+done
+
+unset count
+unset i
+unset currname
+unset currp

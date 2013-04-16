@@ -1,0 +1,7 @@
+#!/bin/sh
+CPUp=`top -l 1 | awk '/CPU usage/ {print $3}' | sed s/%//`
+CPUp=`echo "tmp=$CPUp; tmp /= 1; tmp" | bc`
+
+echo "CPU Usage      	`sparkprocent -v $CPUp`"
+
+unset CPUp
