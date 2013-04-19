@@ -55,7 +55,6 @@ else
 		echo "\033[0m\c"
 	fi
 
-	typeset -i b=5
 	while [ $b -le $MousePercent ]
 	do
 		echo "|\c"
@@ -92,7 +91,6 @@ else
 		echo "\033[0m\c"
 	fi
 
-	typeset -i b=5
 	while [ $b -le $TrackpadPercent ]
 	do
 		echo "|\c"
