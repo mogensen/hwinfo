@@ -1,6 +1,6 @@
 #!/bin/sh
-CPUp=`top -l 1 | awk '/CPU usage/ {print $3}' | sed s/%//`
-CPUp=`echo "tmp=$CPUp; tmp /= 1; tmp" | bc`
+CPUp=`sysctl vm.loadavg |awk '{print $3}'`
+CPUp=`echo "tmp=$CPUp*100; tmp /= 1; tmp" | bc`
 
 echo "CPU Usage      	`sparkprocent -v $CPUp`"
 
