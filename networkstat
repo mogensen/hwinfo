@@ -11,8 +11,6 @@ $chan			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Curre
 $sig			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/agrCtlRSSI:/ {print $2}' | sed -e 's/.*agrCtlRSSI: //'`;
 $noise			= `/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport -I | awk '/agrCtlNoise:/ {print $2}' | sed -e 's/.*agrCtlNoise: //'`;
 
-$snr	= int($sig/$noise * 100 + 0.5);
-$spark	= `sparkprocent -v $snr`;
 
 if($ethernetIP) { 
 	$ethernetIP =~ /inet (.*) netmask/s; 
@@ -35,6 +33,9 @@ if($vpnIP) {
 } 
 
 if($airportIP) { 
+	$snr	= int($sig/$noise * 100 + 0.5);
+	$spark	= `sparkprocent -v $snr`;
+
 	$airportIP =~ /inet (.*) netmask/s; 
 	$airportIP = $1; 
 	$output .= "\n";
@@ -47,7 +48,7 @@ if($airportIP) {
 	$output .= "NOISE:		$noise";
 	$output .= "SNR:		$spark";
 } else { 
-	$output .= "Airport:#INACTIVE";
+	$output .= "Airport:	INACTIVE";
 } 
 
 print $output;
